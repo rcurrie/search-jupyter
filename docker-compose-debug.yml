@@ -1,42 +1,47 @@
 version: '2'
 
 volumes:
-  ipfs:
   es:
-  ensembl:
 
 services:
-  ipfs:
-    image: ipfs/go-ipfs
+  search:
+    image: robcurrie/searchjupyter
+    ports:
+      - "80:5000"
+
+    # Build and run out of local directory with auto-reload
+    build: .
     volumes:
-      - ipfs:/data/ipfs
+      - .:/usr/src/app
+      - /data/notebooks:/notebooks
+    command: --python-autoreload=1 --processes=1 --threads=1
+
+  nginx:
+    image: nginx:stable-alpine
+    volumes:
+      - /data/notebooks:/usr/share/nginx/html/notebooks
+
+  nbviewer:
+    image: nbviewer
+    build:
+      context: .
+      dockerfile: Dockerfile.nbviewer
+    volumes:
+      - /data/notebooks:/notebooks
+    command: python3 -m nbviewer --port=8080 --no-cache --localfiles=/notebooks --base_url=/nbviewer
 
   es:
     image: elasticsearch
     volumes:
       - es:/usr/share/elasticsearch/data
 
-  crawl:
-    image: robcurrie/searchcgt
-    links:
-      - ipfs
-      - es
-    volumes:
-      - ./pyensembl:/root/.cache/pyensembl
-      - .:/usr/src/app
-    entrypoint: python searchcgt/crawl.py -t 60 -i 1 QmWPSzKERs6KAjb8QfSXViFqyEUn3VZYYnXjgG6hJwXWYK
+  # crawl:
+  #   image: robcurrie/searchcgt
+  #   links:
+  #     - ipfs
+  #     - es
+  #   volumes:
+  #     - ./pyensembl:/root/.cache/pyensembl
+  #     - .:/usr/src/app
+  #   entrypoint: python searchcgt/crawl.py -t 60 -i 1 QmWPSzKERs6KAjb8QfSXViFqyEUn3VZYYnXjgG6hJwXWYK
 
-  search:
-    image: robcurrie/searchcgt
-    ports:
-      - "5000:5000"
-    links:
-      - ipfs
-      - es
-
-    # Build and run out of local directory with auto-reload
-    build: .
-    volumes:
-      - ensembl:/root/.cache/pyensembl
-      - .:/usr/src/app
-    command: --python-autoreload=1 --processes=1 --threads=1

@@ -3,4 +3,3 @@ uwsgi
 requests
 hug
 elasticsearch
-pyensembl
