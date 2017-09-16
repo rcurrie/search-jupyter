@@ -7,7 +7,7 @@ import {
     Hits,
 } from 'searchkit';
 
-const sk = new SearchkitManager('/es');
+const sk = new SearchkitManager('http://rcurrie-dev.gi.ucsc.edu:9200/');
 
 class MovieHits extends Hits {
   renderResult(result) {

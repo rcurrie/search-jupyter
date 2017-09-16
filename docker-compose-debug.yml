@@ -31,9 +31,18 @@ services:
     command: python3 -m nbviewer --port=8080 --no-cache --localfiles=/notebooks --base_url=/nbviewer
 
   es:
-    image: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.3
+    ports:
+      - "9200:9200"
     volumes:
       - es:/usr/share/elasticsearch/data
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - http.cors.allow-headers=X-Requested-With, Content-Type, Content-Length, Access-Control-Allow-Headers, Authorization
+
 
   # crawl:
   #   image: robcurrie/searchcgt
